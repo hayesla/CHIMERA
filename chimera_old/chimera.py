@@ -28,7 +28,7 @@
 			pip install sunpy
 ;
 ; History     : Written 24-oct-2017, Tadhg Garton, TCD
-;
+;				updated 22-Feb-2019 Laura Hayes, TCD/DIAS
 ; Contact     : gartont@tcd.ie
 ;		info@solarmonitor.org
 
@@ -57,10 +57,13 @@ plt.style.use(astropy_mpl_style)
 #=============defines location of .fits files=======================
 
 #==============Finds all fits files==============
-im171 = glob.glob('*00171*.fts')
-im193 = glob.glob('*00193*.fts')
-im211 = glob.glob('*00211*.fts')
-imhmi = glob.glob('*hmi*.fts')
+
+file_path = '/Users/laurahayes/solarmonitor_2_0/CHIMERA/chimera_old/data_tests/'
+
+im171 = glob.glob(file_path + '*171*.fts.gz')
+im193 = glob.glob(file_path + '*193*.fts.gz')
+im211 = glob.glob(file_path + '*211*.fts.gz')
+imhmi = glob.glob(file_path + '*hmi*.fts.gz')
 
 if im171 == [] or im193 == [] or im211 == [] or imhmi == [] :
 	print("Not all required files present")
@@ -86,6 +89,7 @@ datc=dn(np.arange(0,4096),np.arange(0,4096))
 
 hedm=fits.getheader(imhmi[0],hdu_number)
 datm= fits.getdata(imhmi[0], ext=0)
+
 
 if hedm['crota1'] > 90:
 	datm=np.rot90(np.rot90(datm))
@@ -204,7 +208,7 @@ cand=cand*circ
 #=====contours the identified datapoints=======
 
 cand=np.array(cand,dtype=np.uint8)
-im,cont,heir=cv2.findContours(cand,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+cont,heir=cv2.findContours(cand,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 #======sorts contours by size============
 
@@ -299,7 +303,7 @@ for i in range(len(cont)):
 
 #=====calculate area of CH with minimal projection effects======
 
-				trupixar=abs(area/cos(ang))
+				trupixar=abs(area/np.cos(ang))
 				truarcar=trupixar*(dattoarc**2)
 				trummar=truarcar*((6.96e+08/rs)**2)
 
@@ -368,9 +372,9 @@ for i in range(len(cont)):
 				props[18,ident+1]=np.str(np.round(mBneg,1))
 				props[19,ident+1]=np.str(np.round(np.max(npix[1]),1))
 				props[20,ident+1]=np.str(np.round(np.min(npix[1]),1))
-				tbpos= np.sum(datm[pos[:,0],pos[:,1]][where(datm[pos[:,0],pos[:,1]] > 0)])
+				tbpos= np.sum(datm[pos[:,0],pos[:,1]][np.where(datm[pos[:,0],pos[:,1]] > 0)])
 				props[21,ident+1]='{:.1e}'.format(tbpos)
-				tbneg= np.sum(datm[pos[:,0],pos[:,1]][where(datm[pos[:,0],pos[:,1]] < 0)])
+				tbneg= np.sum(datm[pos[:,0],pos[:,1]][np.where(datm[pos[:,0],pos[:,1]] < 0)])
 				props[22,ident+1]='{:.1e}'.format(tbneg)
 				props[23,ident+1]='{:.1e}'.format(mB*trummar*1e+16)
 				props[24,ident+1]='{:.1e}'.format(mBpos*trummar*1e+16)
@@ -383,30 +387,56 @@ for i in range(len(cont)):
 #=====sets ident back to max value of iarr======
 
 ident=ident-1
+np.savetxt('ch_summary.txt', props, fmt = '%s')
 
 #====create image in output folder=======
+from scipy.misc import bytescale
 
-chs=np.where(iarr > 0)
-slate[chs]=1
-slate=np.array(slate,dtype=np.uint8)
-im,cont,heir=cv2.findContours(slate,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
-circ[:]=0
-r=(rs/dattoarc)
-w=np.where((xgrid-center[0])**2+(ygrid-center[1])**2 <= r**2)
-circ[w]=1.0
+def plot_tricolor():
+	tricolorarray = np.zeros((4096, 4096, 3))
 
-plt.figure(figsize=(10,10))
-plt.xlim(143,4014)
-plt.ylim(143,4014)
-plt.scatter(chs[1],chs[0],marker='s',s=0.0205,c='black',cmap='viridis',edgecolor='none',alpha=0.2)
-plt.gca().set_aspect('equal', adjustable='box')
-plt.axis('off')
-cs=plt.contour(xgrid,ygrid,slate,colors='black',linewidths=0.5)
-cs=plt.contour(xgrid,ygrid,circ,colors='black',linewidths=1.0)
-plt.show()
-plt.savefig('CH_mask_'+hedb["DATE"]+'.png',transparent=True)
+	data_a = bytescale(np.log10(data), cmin = 1.2, cmax = 3.9)
+	data_b = bytescale(np.log10(datb), cmin = 1.4, cmax = 3.0)
+	data_c = bytescale(np.log10(datc), cmin = 0.8, cmax = 2.7)
 
+	tricolorarray[..., 0] = data_c/np.max(data_c)
+	tricolorarray[..., 1] = data_b/np.max(data_b)
+	tricolorarray[..., 2] = data_a/np.max(data_a)
+
+
+	fig, ax = plt.subplots(figsize = (10, 10))
+
+	plt.imshow(tricolorarray, origin = 'lower', extent = )
+	cs=plt.contour(xgrid,ygrid,slate,colors='white',linewidths=0.5)
+	plt.savefig('tricolor.png')
+	plt.close()
+
+def plot_mask():
+	chs=np.where(iarr > 0)
+	slate[chs]=1
+	slate=np.array(slate,dtype=np.uint8)
+	cont,heir=cv2.findContours(slate,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+
+	circ[:]=0
+	r=(rs/dattoarc)
+	w=np.where((xgrid-center[0])**2+(ygrid-center[1])**2 <= r**2)
+	circ[w]=1.0
+
+	plt.figure(figsize=(10,10))
+	plt.xlim(143,4014)
+	plt.ylim(143,4014)
+	plt.scatter(chs[1],chs[0],marker='s',s=0.0205,c='black',cmap='viridis',edgecolor='none',alpha=0.2)
+	plt.gca().set_aspect('equal', adjustable='box')
+	plt.axis('off')
+	cs=plt.contour(xgrid,ygrid,slate,colors='black',linewidths=0.5)
+	cs=plt.contour(xgrid,ygrid,circ,colors='black',linewidths=1.0)
+
+	plt.savefig('CH_mask_'+hedb["DATE"]+'.png',transparent=True)
+	plt.close()
 #====stores all CH properties in a text file=====
+
+plot_tricolor()
+plot_mask()
 
 #====EOF====
