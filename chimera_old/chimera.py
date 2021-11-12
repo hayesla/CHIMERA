@@ -29,6 +29,7 @@
 ;
 ; History     : Written 24-oct-2017, Tadhg Garton, TCD
 ;				updated 22-Feb-2019 Laura Hayes, TCD/DIAS
+;				updated 21-Nov-2021 Peijin Zhang, Fix deprecation problems
 ; Contact     : gartont@tcd.ie
 ;		info@solarmonitor.org
 
@@ -58,7 +59,7 @@ plt.style.use(astropy_mpl_style)
 
 #==============Finds all fits files==============
 
-file_path = '/Users/laurahayes/solarmonitor_2_0/CHIMERA/chimera_old/data_tests/'
+file_path = './'
 
 im171 = glob.glob(file_path + '*171*.fts.gz')
 im193 = glob.glob(file_path + '*193*.fts.gz')
@@ -129,7 +130,7 @@ iarr=np.zeros((s[0],s[1]),dtype=np.byte)
 offarr,slate=np.array(iarr),np.array(iarr)
 bmcool=np.zeros((s[0],s[1]),dtype=np.float32)
 cand,bmmix,bmhot=np.array(bmcool),np.array(bmcool),np.array(bmcool)
-circ=np.zeros((s[0],s[1]),dtype=np.int)
+circ=np.zeros((s[0],s[1]),dtype=int)
 
 
 #=======creation of a 2d gaussian for magnetic cut offs===========
@@ -339,39 +340,39 @@ for i in range(len(cont)):
 
 				width=round(maxxlon.value)-round(minxlon.value)
 
-				if minxlon.value >= 0.0 : eastl='W'+np.str(np.int(np.round(minxlon.value))) 
-				else : eastl='E'+np.str(np.absolute(np.int(np.round(minxlon.value))))
-				if maxxlon.value >= 0.0 : westl='W'+np.str(np.int(np.round(maxxlon.value))) 
-				else : westl='E'+np.str(np.absolute(np.int(np.round(maxxlon.value))))
+				if minxlon.value >= 0.0 : eastl='W'+str(int(np.round(minxlon.value))) 
+				else : eastl='E'+str(np.absolute(int(np.round(minxlon.value))))
+				if maxxlon.value >= 0.0 : westl='W'+str(int(np.round(maxxlon.value))) 
+				else : westl='E'+str(np.absolute(int(np.round(maxxlon.value))))
 
-				if centlat >= 0.0 : centlat='N'+np.str(np.int(np.round(centlat.value))) 
-				else : centlat='S'+np.str(np.absolute(np.int(np.round(centlat.value))))
-				if centlon >= 0.0 : centlon='W'+np.str(np.int(np.round(centlon.value))) 
-				else : centlon='E'+np.str(np.absolute(np.int(np.round(centlon.value))))
+				if centlat >= 0.0 : centlat='N'+str(int(np.round(centlat.value))) 
+				else : centlat='S'+str(np.absolute(int(np.round(centlat.value))))
+				if centlon >= 0.0 : centlon='W'+str(int(np.round(centlon.value))) 
+				else : centlon='E'+str(np.absolute(int(np.round(centlon.value))))
 
 #====insertions of CH properties into property array=====
 
-				props[0,ident+1]=np.str(ident)
-				props[1,ident+1]=np.str(np.round(arccent[0]))
-				props[2,ident+1]=np.str(np.round(arccent[1]))
-				props[3,ident+1]=np.str(centlon+centlat)
-				props[4,ident+1]=np.str(np.round(Xeb))
-				props[5,ident+1]=np.str(np.round(Yeb))
-				props[6,ident+1]=np.str(np.round(Xwb))
-				props[7,ident+1]=np.str(np.round(Ywb))					
-				props[8,ident+1]=np.str(np.round(Xnb))
-				props[9,ident+1]=np.str(np.round(Ynb))
-				props[10,ident+1]=np.str(np.round(Xsb))
-				props[11,ident+1]=np.str(np.round(Ysb))
-				props[12,ident+1]=np.str(eastl+'-'+westl)
-				props[13,ident+1]=np.str(width)
+				props[0,ident+1]=str(ident)
+				props[1,ident+1]=str(np.round(arccent[0]))
+				props[2,ident+1]=str(np.round(arccent[1]))
+				props[3,ident+1]=str(centlon+centlat)
+				props[4,ident+1]=str(np.round(Xeb))
+				props[5,ident+1]=str(np.round(Yeb))
+				props[6,ident+1]=str(np.round(Xwb))
+				props[7,ident+1]=str(np.round(Ywb))					
+				props[8,ident+1]=str(np.round(Xnb))
+				props[9,ident+1]=str(np.round(Ynb))
+				props[10,ident+1]=str(np.round(Xsb))
+				props[11,ident+1]=str(np.round(Ysb))
+				props[12,ident+1]=str(eastl+'-'+westl)
+				props[13,ident+1]=str(width)
 				props[14,ident+1]='{:.1e}'.format(trummar/1e+12)
-				props[15,ident+1]=np.str(np.round((arcar*100/(np.pi*(rs**2))),1))
-				props[16,ident+1]=np.str(np.round(mB,1))
-				props[17,ident+1]=np.str(np.round(mBpos,1))
-				props[18,ident+1]=np.str(np.round(mBneg,1))
-				props[19,ident+1]=np.str(np.round(np.max(npix[1]),1))
-				props[20,ident+1]=np.str(np.round(np.min(npix[1]),1))
+				props[15,ident+1]=str(np.round((arcar*100/(np.pi*(rs**2))),1))
+				props[16,ident+1]=str(np.round(mB,1))
+				props[17,ident+1]=str(np.round(mBpos,1))
+				props[18,ident+1]=str(np.round(mBneg,1))
+				props[19,ident+1]=str(np.round(np.max(npix[1]),1))
+				props[20,ident+1]=str(np.round(np.min(npix[1]),1))
 				tbpos= np.sum(datm[pos[:,0],pos[:,1]][np.where(datm[pos[:,0],pos[:,1]] > 0)])
 				props[21,ident+1]='{:.1e}'.format(tbpos)
 				tbneg= np.sum(datm[pos[:,0],pos[:,1]][np.where(datm[pos[:,0],pos[:,1]] < 0)])
@@ -390,15 +391,22 @@ ident=ident-1
 np.savetxt('ch_summary.txt', props, fmt = '%s')
 
 #====create image in output folder=======
-from scipy.misc import bytescale
+#from scipy.misc import bytescale
+
+from skimage.util import img_as_ubyte
+
+def rescale01(arr, cmin=None, cmax=None, a=0, b=1):
+    if cmin or cmax:
+        arr = np.clip(arr, cmin, cmax)
+    return (b-a) * ((arr - np.min(arr)) / (np.max(arr) - np.min(arr))) + a
 
 
 def plot_tricolor():
 	tricolorarray = np.zeros((4096, 4096, 3))
 
-	data_a = bytescale(np.log10(data), cmin = 1.2, cmax = 3.9)
-	data_b = bytescale(np.log10(datb), cmin = 1.4, cmax = 3.0)
-	data_c = bytescale(np.log10(datc), cmin = 0.8, cmax = 2.7)
+	data_a = img_as_ubyte(rescale01(np.log10(data), cmin = 1.2, cmax = 3.9))
+	data_b = img_as_ubyte(rescale01(np.log10(datb), cmin = 1.4, cmax = 3.0))
+	data_c = img_as_ubyte(rescale01(np.log10(datc), cmin = 0.8, cmax = 2.7))
 
 	tricolorarray[..., 0] = data_c/np.max(data_c)
 	tricolorarray[..., 1] = data_b/np.max(data_b)
@@ -407,12 +415,12 @@ def plot_tricolor():
 
 	fig, ax = plt.subplots(figsize = (10, 10))
 
-	plt.imshow(tricolorarray, origin = 'lower', extent = )
+	plt.imshow(tricolorarray, origin = 'lower')#, extent = )
 	cs=plt.contour(xgrid,ygrid,slate,colors='white',linewidths=0.5)
 	plt.savefig('tricolor.png')
 	plt.close()
 
-def plot_mask():
+def plot_mask(slate=slate):
 	chs=np.where(iarr > 0)
 	slate[chs]=1
 	slate=np.array(slate,dtype=np.uint8)
